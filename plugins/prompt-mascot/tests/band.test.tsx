@@ -20,7 +20,7 @@ test('keeps what another mod draws in the band, on both surfaces', async ($, on)
   })
 
   for (const surface of ['terminal', 'desktop'] as const) {
-    const ui = await $.ui.mount({ plugin: 'spark-mascot', surface, ...BAND })
+    const ui = await $.ui.mount({ plugin: 'prompt-mascot', surface, ...BAND })
     expect(await ui.find({ type: 'Text', text: /run the tests/ })).toBeDefined()
     await ui.unmount()
   }

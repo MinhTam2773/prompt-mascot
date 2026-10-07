@@ -18,6 +18,6 @@ export type MascotState = { mood: MascotMood; line: string; from?: MascotMood }
 
 declare module 'claude-code' {
   interface PluginState {
-    'spark-mascot': { current: MascotState; isHidden: boolean }
+    'prompt-mascot': { current: MascotState; isHidden: boolean }
   }
 }

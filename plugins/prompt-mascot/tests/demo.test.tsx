@@ -19,7 +19,7 @@ test('/mascot demo plays every emotion in order, then rests', async ($, on) => {
     const { Box } = $.ui.resolve(e)
     return <Box />
   })
-  const ui = await $.ui.mount({ plugin: 'spark-mascot', surface: 'desktop', ...BAND })
+  const ui = await $.ui.mount({ plugin: 'prompt-mascot', surface: 'desktop', ...BAND })
   const mood = async () => String((await ui.find({ type: 'Svg' }))?.props.alt ?? '').replace(/^Claude mascot, (\w+).*$/, '$1')
 
   await $.command.run({ command: 'mascot', args: 'demo' })

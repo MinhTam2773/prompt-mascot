@@ -26,7 +26,7 @@ test('it thinks while the model thinks, and types once the reply text streams in
     yield { kind: 'text', index: 1, text: ' there was a critter.' }
     return { turnId: 't1', index: 0, answer: 'Once upon a time there was a critter.', toolUses: [], stopReason: 'end_turn', usage: null }
   })
-  const ui = await $.ui.mount({ plugin: 'spark-mascot', surface: 'desktop', ...BAND })
+  const ui = await $.ui.mount({ plugin: 'prompt-mascot', surface: 'desktop', ...BAND })
   const alt = async () => String((await ui.find({ type: 'Svg' }))?.props.alt ?? '')
 
   // A turn is running (isWorking) and nothing has streamed yet: thinking.

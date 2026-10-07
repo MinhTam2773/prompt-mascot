@@ -1,11 +1,11 @@
 {
-  "name": "spark-mascot",
-  "description": "Spark, an animated Claude mascot for Claude Code.",
+  "name": "prompt-mascot",
+  "description": "An animated Claude mascot for Claude Code.",
   "owner": { "name": "Minh" },
   "plugins": [
     {
-      "name": "spark-mascot",
-      "source": "./plugins/spark-mascot",
+      "name": "prompt-mascot",
+      "source": "./plugins/prompt-mascot",
       "description": "A little Claude that stands above the prompt: thinks, types on a laptop while tools run, and reacts to each reply.",
       "version": "0.1.0"
     }

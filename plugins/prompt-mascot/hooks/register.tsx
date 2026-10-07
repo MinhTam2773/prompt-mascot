@@ -5,8 +5,8 @@ import type { MascotMood, MascotState } from '../types'
 import { drawMascot, FACES, HEIGHT, WIDTH } from './art'
 import { lineFor, moodForAnswer, stateForTool } from './mood'
 
-const current = atom({ plugin: 'spark-mascot', key: 'current' } as const, { mood: 'idle', line: '' })
-const isHidden = atom({ plugin: 'spark-mascot', key: 'isHidden' } as const, false)
+const current = atom({ plugin: 'prompt-mascot', key: 'current' } as const, { mood: 'idle', line: '' })
+const isHidden = atom({ plugin: 'prompt-mascot', key: 'isHidden' } as const, false)
 
 const IDLE: MascotState = { mood: 'idle', line: '' }
 const SLEEPY: MascotState = { mood: 'sleepy', line: '' }
@@ -218,7 +218,7 @@ export const register: Register = on => {
       return (
         <Box flexDirection="column">
           {below}
-          <Box key="spark-mascot" flexDirection="row" justifyContent="flex-end" width="100%">
+          <Box key="prompt-mascot" flexDirection="row" justifyContent="flex-end" width="100%">
             <Svg source={drawMascot(state)} alt={alt} width={WIDTH} height={HEIGHT} />
           </Box>
         </Box>

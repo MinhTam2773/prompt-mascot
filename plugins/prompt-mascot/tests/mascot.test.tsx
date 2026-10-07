@@ -66,11 +66,11 @@ test('draws a picture on desktop and a face on the terminal', async ($, on) => {
     return <Box />
   })
 
-  const desktop = await $.ui.mount({ plugin: 'spark-mascot', surface: 'desktop', ...BAND })
+  const desktop = await $.ui.mount({ plugin: 'prompt-mascot', surface: 'desktop', ...BAND })
   expect(await desktop.find({ type: 'Svg' })).toBeDefined()
   await desktop.unmount()
 
-  const terminal = await $.ui.mount({ plugin: 'spark-mascot', surface: 'terminal', ...BAND })
+  const terminal = await $.ui.mount({ plugin: 'prompt-mascot', surface: 'terminal', ...BAND })
   expect(await terminal.find({ type: 'Text', text: /▐▛▘▝▜▌/ })).toBeDefined()
   await terminal.unmount()
 })
