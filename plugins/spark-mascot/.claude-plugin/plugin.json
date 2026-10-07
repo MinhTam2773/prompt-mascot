@@ -1,0 +1,7 @@
+{
+  "name": "spark-mascot",
+  "version": "0.1.0",
+  "description": "A little Claude that stands above the prompt: thinks, types on a laptop while tools run, and reacts to each reply.",
+  "author": { "name": "Minh" },
+  "types": "./types/index.d.ts"
+}
