@@ -6,8 +6,8 @@
     {
       "name": "prompt-mascot",
       "source": "./plugins/prompt-mascot",
-      "description": "A little Claude that stands above the prompt: thinks, types on a laptop while tools run, and reacts to each reply.",
-      "version": "0.1.0"
+      "description": "A little Claude that stands above the prompt: thinks, types on a laptop while tools run, and reacts to each reply. A small donut beside it shows how full the context window is.",
+      "version": "0.2.0"
     }
   ]
 }

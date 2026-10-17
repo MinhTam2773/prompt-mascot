@@ -27,7 +27,7 @@ test('it thinks while the model thinks, and types once the reply text streams in
     return { turnId: 't1', index: 0, answer: 'Once upon a time there was a critter.', toolUses: [], stopReason: 'end_turn', usage: null }
   })
   const ui = await $.ui.mount({ plugin: 'prompt-mascot', surface: 'desktop', ...BAND })
-  const alt = async () => String((await ui.find({ type: 'Svg' }))?.props.alt ?? '')
+  const alt = async () => String((await ui.findAll({ type: 'Svg' })).find(s => String(s.props.alt).startsWith('Claude mascot'))?.props.alt ?? '')
 
   // A turn is running (isWorking) and nothing has streamed yet: thinking.
   await clock.settle()

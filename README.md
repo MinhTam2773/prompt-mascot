@@ -4,6 +4,8 @@ A little Claude that stands above the prompt in Claude Code. It thinks while the
 
 In the desktop app it's an animated pixel-art figure with a speech bubble; in the terminal it's a small face with a status line.
 
+On the left of the same row, a small donut shows how much of the context window you have used, followed by the repo and branch you're working in.
+
 > Unofficial fan project. Not made, endorsed or supported by Anthropic. Claude is a trademark of Anthropic.
 
 ## Install
@@ -29,6 +31,23 @@ Prompt Mascot uses Claude Code's hooks-module plugin format, which needs a recen
 | `/mascot show` / `/mascot hide` | Show or hide explicitly |
 | `/mascot demo` | Play every emotion in turn (about 38 seconds) |
 | `/mascot stop` | End the demo early |
+
+## Context donut
+
+The donut fills as the conversation uses up the context window: orange while there's room, amber from 70% and red from 90%, when Claude is close to compacting the conversation. In the terminal it's a quarter-filled circle (○ ◔ ◑ ◕ ●).
+
+Only the percent shows at rest. Click it to see the numbers, and click again to hide them:
+
+```
+110k of 200k used · 57k left before compaction
+Messages 61k · MCP tools 22k · System tools 15k · Skills 5k
+```
+
+The percent is the same figure Claude Code's status line uses. The category list is a quick local estimate, so its parts may not add up exactly. Before Claude's first reply there's no reading yet, so it shows a dash.
+
+Beside the percent are the repo's name and the branch checked out, like `prompt-mascot ⎇ main`. Long branch names are shortened, a checkout with no branch shows its short commit ID, and outside a git repo only the donut shows. They update when a session starts and after each reply.
+
+`/mascot hide` hides the mascot but keeps the donut.
 
 ## How it picks a mood
 

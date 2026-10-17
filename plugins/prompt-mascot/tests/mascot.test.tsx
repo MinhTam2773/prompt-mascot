@@ -67,7 +67,7 @@ test('draws a picture on desktop and a face on the terminal', async ($, on) => {
   })
 
   const desktop = await $.ui.mount({ plugin: 'prompt-mascot', surface: 'desktop', ...BAND })
-  expect(await desktop.find({ type: 'Svg' })).toBeDefined()
+  expect((await desktop.findAll({ type: 'Svg' })).some(s => String(s.props.alt).startsWith('Claude mascot'))).toBe(true)
   await desktop.unmount()
 
   const terminal = await $.ui.mount({ plugin: 'prompt-mascot', surface: 'terminal', ...BAND })

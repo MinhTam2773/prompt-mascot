@@ -3,10 +3,15 @@ import type { Register, Timer } from 'claude-code'
 
 import type { MascotMood, MascotState } from '../types'
 import { drawMascot, FACES, HEIGHT, WIDTH } from './art'
+import { colorFor, detailLines, drawDonut, glyphFor, loadDetail, loadRepo, percentLabel, toReading } from './context'
 import { lineFor, moodForAnswer, stateForTool } from './mood'
 
 const current = atom({ plugin: 'prompt-mascot', key: 'current' } as const, { mood: 'idle', line: '' })
 const isHidden = atom({ plugin: 'prompt-mascot', key: 'isHidden' } as const, false)
+const context = atom({ plugin: 'prompt-mascot', key: 'context' } as const, null)
+const contextDetail = atom({ plugin: 'prompt-mascot', key: 'contextDetail' } as const, null)
+const isContextOpen = atom({ plugin: 'prompt-mascot', key: 'isContextOpen' } as const, false)
+const repo = atom({ plugin: 'prompt-mascot', key: 'repo' } as const, null)
 
 const IDLE: MascotState = { mood: 'idle', line: '' }
 const SLEEPY: MascotState = { mood: 'sleepy', line: '' }
@@ -62,6 +67,11 @@ export const register: Register = on => {
       name: 'mascot',
       description: 'Show or hide the Claude mascot (demo: play every emotion, stop: end the demo)',
     })
+
+    const usage = await $.session.usage()
+    await update($, context, () => toReading(usage.context))
+    const where = await loadRepo($)
+    await update($, repo, () => where)
 
     const now = await $.clock.now()
     const state = await read($, current)
@@ -192,22 +202,77 @@ export const register: Register = on => {
     return result
   })
 
+  // After each turn the engine measures the context window; keep the donut
+  // current, and the branch too, in case the turn switched it.
+  on('session.measure', async ($, e, next) => {
+    const where = await loadRepo($)
+    await update($, repo, () => where)
+    if (e.changed.includes('context')) {
+      const reading = toReading(e.context)
+      await update($, context, () => reading)
+      if (await read($, isContextOpen)) {
+        const detail = await loadDetail($, reading.tokens)
+        await update($, contextDetail, () => detail)
+      }
+    }
+    return next(e)
+  })
+
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     // Other mods share this band (next-steps puts its suggestions here), so
-    // let them draw first and add the mascot on its own row after what they drew.
-    // What they drew may be the engine's own node, which the engine refuses
-    // under a Box with sizing props, so it goes into a plain column untouched.
+    // let them draw first and add our row after what they drew: the context
+    // donut on the left, the mascot on the right. What they drew may be the
+    // engine's own node, which the engine refuses under a Box with sizing
+    // props, so it goes into a plain column untouched.
     const below = await next(e)
-    if (e.props.hasSurvey || (await read($, isHidden))) return below
+    if (e.props.hasSurvey || (e.surface !== 'desktop' && e.surface !== 'terminal')) return below
 
+    // /mascot hide hides the mascot only; the donut stays.
+    const hidden = await read($, isHidden)
     let state = await read($, current)
     // A turn is running but no turn.start reached us (say, right after a reload).
     if (e.props.isWorking && (state.mood === 'idle' || state.mood === 'sleepy')) {
       state = { mood: 'thinking', line: lineFor('thinking', 0) }
     }
 
+    const reading = await read($, context)
+    const pct = reading?.percent ?? null
+    const label = percentLabel(pct)
+    const lines = (await read($, isContextOpen)) ? detailLines(reading, await read($, contextDetail)) : []
+    const toggleNumbers = async () => {
+      if (!(await read($, isContextOpen))) {
+        const detail = await loadDetail($, (await read($, context))?.tokens ?? null)
+        await update($, contextDetail, () => detail)
+      }
+      await update($, isContextOpen, open => !open)
+    }
+
+    const { Box, Button, Text } = $.ui.resolve(e)
+    const percent = <Button key="context-percent" plain dimColor label={label} onPress={toggleNumbers} />
+    const where = await read($, repo)
+    const repoParts = where
+      ? [
+          <Text key="repo-sep" dimColor>
+            ·
+          </Text>,
+          <Text key="repo-name">{where.name}</Text>,
+          ...(where.branch === null
+            ? []
+            : [
+                <Text key="repo-branch" dimColor>
+                  {`⎇ ${where.branch}`}
+                </Text>,
+              ]),
+        ]
+      : []
+    const numbers = lines.map(line => (
+      <Text key={line} dimColor>
+        {line}
+      </Text>
+    ))
+
     if (e.surface === 'desktop') {
-      const { Box, Svg } = $.ui.resolve(e)
+      const { Svg } = $.ui.resolve(e)
       const alt = `Claude mascot, ${state.mood}${state.line ? `: ${state.line}` : ''}`
 
       // Drawn as a plain image, not an interactive frame: a frame loads each new
@@ -218,25 +283,40 @@ export const register: Register = on => {
       return (
         <Box flexDirection="column">
           {below}
-          <Box key="prompt-mascot" flexDirection="row" justifyContent="flex-end" width="100%">
-            <Svg source={drawMascot(state)} alt={alt} width={WIDTH} height={HEIGHT} />
+          <Box key="prompt-mascot" flexDirection="row" justifyContent="space-between" alignItems="center" width="100%">
+            <Box flexDirection="column">
+              <Box flexDirection="row" alignItems="center" gap={1}>
+                <Svg source={drawDonut(pct)} alt={`Context window ${label} full`} width={16} height={16} />
+                {percent}
+                {repoParts}
+              </Box>
+              {numbers}
+            </Box>
+            {!hidden && <Svg source={drawMascot(state)} alt={alt} width={WIDTH} height={HEIGHT} />}
           </Box>
         </Box>
       )
     }
 
-    if (e.surface !== 'terminal') return below
-    const { Box, Text } = $.ui.resolve(e)
-
     return (
       <Box flexDirection="column">
         {below}
-        <Box flexDirection="row" justifyContent="flex-end" width="100%">
-          <Text color="#D97757" bold>
-            {FACES[state.mood]}
-          </Text>
-          {state.line !== '' && <Text dimColor> {state.line}</Text>}
+        <Box flexDirection="row" justifyContent="space-between" width="100%">
+          <Box flexDirection="row" gap={1}>
+            <Text color={colorFor(pct)}>{glyphFor(pct)}</Text>
+            {percent}
+            {repoParts}
+          </Box>
+          {!hidden && (
+            <Box flexDirection="row">
+              <Text color="#D97757" bold>
+                {FACES[state.mood]}
+              </Text>
+              {state.line !== '' && <Text dimColor> {state.line}</Text>}
+            </Box>
+          )}
         </Box>
+        {numbers}
       </Box>
     )
   })
